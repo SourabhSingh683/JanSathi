@@ -3,10 +3,9 @@ import Layout from "@/components/Layout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Send, Download, Globe, User, MapPin } from "lucide-react";
+import { FileText, Download, Globe, User } from "lucide-react";
+import ChatInterface from "@/components/ChatInterface";
+import QuickActionButtons from "@/components/QuickActionButtons";
 
 interface Message {
   type: "bot" | "user";
@@ -27,43 +26,18 @@ const RTI = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       type: "bot",
-      content: "🙏 Namaste! I'm JAN-RTI — your digital guide for RTI (Right to Information) assistance.\n\nPlease choose what you'd like to do:\n1️⃣ File an RTI\n2️⃣ Do you want any information?"
+      content: "🙏 Namaste! I'm JAN-RTI — your digital guide for RTI (Right to Information) assistance.\n\nPlease choose what you'd like to do:"
     }
   ]);
 
-  const departments = {
-    english: [
-      "Water Department",
-      "Electricity Department", 
-      "Pension & Benefits",
-      "Education Department",
-      "Labour & Employment",
-      "Petroleum & Natural Gas",
-      "Revenue Department",
-      "Health Department",
-      "Transport Department",
-      "Other"
-    ],
-    hindi: [
-      "जल विभाग",
-      "विद्युत विभाग",
-      "पेंशन एवं लाभ",
-      "शिक्षा विभाग", 
-      "श्रम एवं रोजगार",
-      "पेट्रोलियम एवं प्राकृतिक गैस",
-      "राजस्व विभाग",
-      "स्वास्थ्य विभाग",
-      "परिवहन विभाग",
-      "अन्य"
-    ]
-  };
+  const initialOptions = [
+    "File an RTI Application",
+    "Get RTI Information & Guidance"
+  ];
 
-  const states = [
-    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+  const languageOptions = [
+    "English",
+    "हिंदी (Hindi)"
   ];
 
   const handleUserMessage = (message: string) => {
@@ -73,15 +47,15 @@ const RTI = () => {
       let botResponse = "";
       
       if (step === 0) {
-        if (message.includes("1") || message.toLowerCase().includes("file")) {
+        if (message.includes("File") || message.includes("1")) {
           botResponse = language === "english" 
-            ? "🔄 Please select your language:\n• English\n• हिंदी"
-            : "🔄 कृपया अपनी भाषा चुनें:\n• English\n• हिंदी";
+            ? "🔄 Please select your preferred language:"
+            : "🔄 कृपया अपनी भाषा चुनें:";
           setStep(1);
         } else {
           botResponse = language === "english"
-            ? "I can help you with general RTI information. What would you like to know about RTI process?"
-            : "मैं आपको RTI की सामान्य जानकारी दे सकता हूं। RTI प्रक्रिया के बारे में आप क्या जानना चाहते हैं?";
+            ? "I can help you with general RTI information. RTI (Right to Information) is a constitutional right that allows citizens to access government information. What specific information would you like to know about the RTI process?"
+            : "मैं आपको RTI की सामान्य जानकारी दे सकता हूं। RTI (सूचना का अधिकार) एक संवैधानिक अधिकार है जो नागरिकों को सरकारी जानकारी प्राप्त करने की अनुमति देता है। RTI प्रक्रिया के बारे में आप क्या जानना चाहते हैं?";
         }
       } else if (step === 1) {
         if (message.toLowerCase().includes("hindi") || message.includes("हिंदी")) {
@@ -172,6 +146,12 @@ ${formData.name}
     }]);
   };
 
+  const getCurrentOptions = () => {
+    if (step === 0) return initialOptions;
+    if (step === 1) return languageOptions;
+    return [];
+  };
+
   return (
     <Layout>
       <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -179,91 +159,48 @@ ${formData.name}
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center animate-pulse">
                 <FileText className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">JAN-RTI Assistant</h1>
-            <p className="text-xl text-gray-600">AI-powered RTI application assistance</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2 animate-fade-in">JAN-RTI Assistant</h1>
+            <p className="text-xl text-gray-600 animate-fade-in">AI-powered RTI application assistance</p>
           </div>
 
           {/* Chat Interface */}
-          <Card className="mb-6">
-            <CardHeader>
+          <Card className="mb-6 shadow-xl border-0">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
               <CardTitle className="flex items-center space-x-2">
-                <FileText className="w-5 h-5" />
+                <FileText className="w-5 h-5 text-blue-600" />
                 <span>RTI Chat Assistant</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-96 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
-                {messages.map((message, index) => (
-                  <div key={index} className={`mb-4 ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
-                    <div className={`inline-block p-3 rounded-lg max-w-xs lg:max-w-md ${
-                      message.type === 'user' 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-white text-gray-800 border'
-                    }`}>
-                      <pre className="whitespace-pre-wrap font-sans">{message.content}</pre>
-                      {message.draft && (
-                        <div className="mt-3 p-3 bg-gray-100 rounded text-sm">
-                          <pre className="whitespace-pre-wrap font-mono text-xs">{message.draft}</pre>
-                          <Button 
-                            size="sm" 
-                            className="mt-2"
-                            onClick={() => {
-                              const element = document.createElement('a');
-                              const file = new Blob([message.draft!], {type: 'text/plain'});
-                              element.href = URL.createObjectURL(file);
-                              element.download = 'RTI_Application.txt';
-                              document.body.appendChild(element);
-                              element.click();
-                              document.body.removeChild(element);
-                            }}
-                          >
-                            <Download className="w-4 h-4 mr-1" />
-                            Download
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex space-x-2">
-                <Input
+            <CardContent className="p-0">
+              <div className="p-4">
+                <ChatInterface
+                  messages={messages}
+                  onSendMessage={handleUserMessage}
                   placeholder={language === "english" ? "Type your message..." : "अपना संदेश टाइप करें..."}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      const target = e.target as HTMLInputElement;
-                      const message = target.value.trim();
-                      if (message) {
-                        handleUserMessage(message);
-                        target.value = '';
-                      }
-                    }
-                  }}
+                  language={language}
                 />
-                <Button 
-                  onClick={() => {
-                    const input = document.querySelector('input') as HTMLInputElement;
-                    const message = input.value.trim();
-                    if (message) {
-                      handleUserMessage(message);
-                      input.value = '';
-                    }
-                  }}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
+                
+                {/* Quick Action Buttons for choices */}
+                {getCurrentOptions().length > 0 && (
+                  <div className="mt-4">
+                    <QuickActionButtons 
+                      options={getCurrentOptions()}
+                      onSelect={handleUserMessage}
+                      language={language}
+                    />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Globe className="w-5 h-5" />
@@ -286,7 +223,7 @@ ${formData.name}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <User className="w-5 h-5" />
