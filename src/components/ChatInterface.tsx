@@ -16,24 +16,31 @@ interface ChatInterfaceProps {
   onSendMessage: (message: string) => void;
   placeholder?: string;
   language?: string;
+  className?: string;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   messages, 
   onSendMessage, 
   placeholder = "Type your message...",
-  language = "english" 
+  language = "english",
+  className = ""
 }) => {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [messages]);
 
   const handleSend = () => {
@@ -50,10 +57,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-96">
+    <div className={`flex flex-col ${className}`}>
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg space-y-4"
+        className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg space-y-4 max-h-[500px]"
+        style={{ scrollBehavior: 'smooth' }}
       >
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>

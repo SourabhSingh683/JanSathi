@@ -2,7 +2,7 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, MessageSquare, Award, Users, CheckCircle, Globe, Sparkles, ArrowRight, Zap, Shield, Clock } from "lucide-react";
+import { FileText, MessageSquare, Award, Users, CheckCircle, Globe, Sparkles, ArrowRight, Zap, Shield, Clock, Star, Target, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -51,11 +51,72 @@ const Index = () => {
     }
   ];
 
+  const stats = [
+    {
+      icon: Users,
+      value: "10,000+",
+      label: "Citizens Helped",
+      color: "text-blue-600"
+    },
+    {
+      icon: FileText,
+      value: "5,000+",
+      label: "RTI Applications",
+      color: "text-green-600"
+    },
+    {
+      icon: MessageSquare,
+      value: "3,000+",
+      label: "Grievances Resolved",
+      color: "text-red-600"
+    },
+    {
+      icon: Award,
+      value: "500+",
+      label: "Schemes Matched",
+      color: "text-yellow-600"
+    }
+  ];
+
+  const problemsWesolve = [
+    {
+      icon: Target,
+      title: "Complex Government Procedures",
+      description: "Simplifying bureaucratic processes with AI guidance",
+      color: "text-red-500"
+    },
+    {
+      icon: Clock,
+      title: "Time-Consuming Applications",
+      description: "Reducing application time from hours to minutes",
+      color: "text-blue-500"
+    },
+    {
+      icon: Globe,
+      title: "Language Barriers",
+      description: "Supporting both Hindi and English for better accessibility",
+      color: "text-green-500"
+    },
+    {
+      icon: TrendingUp,
+      title: "Lack of Awareness",
+      description: "Educating citizens about available government schemes",
+      color: "text-purple-500"
+    }
+  ];
+
   return (
     <Layout>
       {/* Hero Section with Enhanced Animations */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-green-50 animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-green-50"></div>
+        
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-4 -right-4 w-72 h-72 bg-gradient-to-br from-indian-saffron/20 to-indian-green/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-8 -left-8 w-96 h-96 bg-gradient-to-tr from-indian-green/20 to-indian-saffron/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
         <div className="relative max-w-7xl mx-auto text-center">
           <div className="mb-8">
             <div className="inline-flex items-center justify-center p-2 bg-gradient-to-r from-indian-saffron to-indian-green rounded-full mb-6 animate-bounce">
@@ -77,17 +138,60 @@ const Index = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in">
-            <Link to="/schemes">
-              <Button size="lg" className="bg-gradient-to-r from-indian-saffron to-orange-600 hover:from-orange-600 hover:to-indian-saffron text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
-                Get Started Now
-                <ArrowRight className="ml-2 w-5 h-5" />
+            <div className="relative group">
+              <Button size="lg" className="bg-gradient-to-r from-indian-saffron to-orange-600 hover:from-orange-600 hover:to-indian-saffron text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg group-hover:shadow-2xl">
+                Choose Your Assistant
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </Link>
+              {/* Dropdown for assistants */}
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <div className="p-4 space-y-2">
+                  <Link to="/rti" className="block">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-blue-50">
+                      <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                      RTI Assistant
+                    </Button>
+                  </Link>
+                  <Link to="/grievance" className="block">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-red-50">
+                      <MessageSquare className="w-4 h-4 mr-2 text-red-500" />
+                      Grievance Assistant
+                    </Button>
+                  </Link>
+                  <Link to="/schemes" className="block">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-green-50">
+                      <Award className="w-4 h-4 mr-2 text-green-500" />
+                      Schemes Assistant
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <Link to="/how-it-works">
               <Button variant="outline" size="lg" className="border-2 border-indian-saffron text-indian-saffron hover:bg-indian-saffron hover:text-white py-4 px-8 rounded-xl text-lg transition-all duration-300">
                 How It Works
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className="text-center group">
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-gray-50 group-hover:bg-gray-100 transition-colors ${stat.color}`}>
+                    <Icon className="w-8 h-8" />
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                  <div className="text-gray-600">{stat.label}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -136,8 +240,45 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Problems We Solve Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indian-saffron/5 to-indian-green/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Problems We Solve
+            </h2>
+            <p className="text-xl text-gray-600">
+              Making government services accessible and user-friendly for everyone
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {problemsWesolve.map((problem, index) => {
+              const Icon = problem.icon;
+              return (
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow border-0 bg-white/80 backdrop-blur">
+                  <CardHeader>
+                    <div className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center bg-gray-50 ${problem.color}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <CardTitle className="text-lg font-bold text-gray-900">
+                      {problem.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-sm">
+                      {problem.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indian-saffron/10 to-indian-green/10">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">

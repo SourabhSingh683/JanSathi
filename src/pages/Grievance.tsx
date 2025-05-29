@@ -1,12 +1,10 @@
 
-import Layout from "@/components/Layout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Send, Upload, AlertCircle, CheckCircle } from "lucide-react";
+import { MessageSquare, Send, CheckCircle, AlertCircle } from "lucide-react";
+import ChatInterface from "@/components/ChatInterface";
+import { generateGrievanceResponse } from "@/utils/grievanceAI";
 
 interface Message {
   type: "bot" | "user";
@@ -17,6 +15,7 @@ interface Message {
 const Grievance = () => {
   const [step, setStep] = useState(0);
   const [language, setLanguage] = useState("english");
+  const [isLoading, setIsLoading] = useState(false);
   const [grievanceData, setGrievanceData] = useState({
     name: "",
     contact: "",
@@ -38,30 +37,14 @@ const Grievance = () => {
 
   const grievanceTypes = {
     english: [
-      "Corruption",
-      "Harassment",
-      "Service Delay",
-      "Poor Infrastructure",
-      "Water Issues",
-      "Electricity Problems",
-      "Healthcare Issues",
-      "Education Problems",
-      "Transport Issues",
-      "Environmental Concerns",
-      "Other"
+      "Corruption", "Harassment", "Service Delay", "Poor Infrastructure", "Water Issues",
+      "Electricity Problems", "Healthcare Issues", "Education Problems", "Transport Issues",
+      "Environmental Concerns", "Other"
     ],
     hindi: [
-      "भ्रष्टाचार",
-      "उत्पीड़न",
-      "सेवा में देरी",
-      "खराब ढांचा",
-      "पानी की समस्या",
-      "बिजली की समस्या",
-      "स्वास्थ्य की समस्या",
-      "शिक्षा की समस्या",
-      "परिवहन की समस्या",
-      "पर्यावरण संबंधी चिंता",
-      "अन्य"
+      "भ्रष्टाचार", "उत्पीड़न", "सेवा में देरी", "खराब ढांचा", "पानी की समस्या",
+      "बिजली की समस्या", "स्वास्थ्य की समस्या", "शिक्षा की समस्या", "परिवहन की समस्या",
+      "पर्यावरण संबंधी चिंता", "अन्य"
     ]
   };
 
@@ -70,10 +53,11 @@ const Grievance = () => {
     hindi: ["कम", "मध्यम", "उच्च", "तत्काल"]
   };
 
-  const handleUserMessage = (message: string) => {
+  const handleUserMessage = async (message: string) => {
     setMessages(prev => [...prev, { type: "user", content: message }]);
+    setIsLoading(true);
     
-    setTimeout(() => {
+    try {
       let botResponse = "";
       
       switch(step) {
@@ -153,22 +137,29 @@ const Grievance = () => {
               : "आपकी पिछली रिपोर्ट का क्या परिणाम था?";
             setStep(9);
           } else {
-            generateGrievanceSummary();
+            await generateGrievanceSummary();
             return;
           }
           break;
           
         case 9:
           setGrievanceData(prev => ({ ...prev, outcome: message }));
-          generateGrievanceSummary();
+          await generateGrievanceSummary();
           return;
       }
       
       setMessages(prev => [...prev, { type: "bot", content: botResponse }]);
-    }, 1000);
+    } catch (error) {
+      const errorMessage = language === 'hindi' 
+        ? 'माफ़ करें, कुछ तकनीकी समस्या है।'
+        : 'Sorry, there was a technical issue.';
+      setMessages(prev => [...prev, { type: "bot", content: errorMessage }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const generateGrievanceSummary = () => {
+  const generateGrievanceSummary = async () => {
     const grievanceId = `GRV-${Date.now()}`;
     const summary = language === "english" ? `
 🎯 GRIEVANCE SUMMARY
@@ -192,7 +183,7 @@ ${grievanceData.outcome ? `📊 Previous Outcome: ${grievanceData.outcome}` : ''
 🕐 Expected Response: 15-30 working days
 📲 Updates: Will be sent via SMS/Email
 
-Thank you for using our Grievance Portal. Your concern has been registered and will be addressed by the relevant authorities.
+Thank you for using our Grievance Portal.
     ` : `
 🎯 शिकायत सारांश
 
@@ -215,7 +206,7 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
 🕐 अपेक्षित प्रतिक्रिया: 15-30 कार्य दिवस
 📲 अपडेट: SMS/ईमेल के माध्यम से भेजे जाएंगे
 
-हमारे शिकायत पोर्टल का उपयोग करने के लिए धन्यवाद। आपकी चिंता दर्ज कर ली गई है और इसे संबंधित अधिकारियों द्वारा संबोधित किया जाएगा।
+धन्यवाद!
     `;
 
     setMessages(prev => [...prev, { 
@@ -223,164 +214,102 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
       content: summary,
       isComplete: true
     }]);
+
+    // Add guidance message
+    const guidanceMessage = language === "english" 
+      ? "📋 **Next Steps & Required Documents:**\n\n**For Grievance Filing:**\n• Keep your Grievance ID for tracking\n• Retain copies of all related documents\n• Follow up if no response in stipulated time\n• Escalate to higher authorities if needed\n\n**Required Documents (if applicable):**\n• Copy of previous complaints\n• Supporting evidence (photos, receipts)\n• Identity proof\n• Address proof\n• Relevant certificates or permits\n\n**Process:**\n1. Submit grievance through official portal\n2. Wait for acknowledgment\n3. Track status using Grievance ID\n4. Respond to any queries from officials\n5. Escalate if unsatisfied with resolution"
+      : "📋 **अगले कदम और आवश्यक दस्तावेज:**\n\n**शिकायत दर्ज करने के लिए:**\n• ट्रैकिंग के लिए अपना शिकायत ID रखें\n• सभी संबंधित दस्तावेजों की प्रति रखें\n• निर्धारित समय में जवाब न मिले तो फॉलो अप करें\n• जरूरत पड़ने पर उच्च अधिकारियों तक पहुंचें\n\n**आवश्यक दस्तावेज (यदि लागू हो):**\n• पिछली शिकायतों की प्रति\n• सहायक सबूत (फोटो, रसीदें)\n• पहचान प्रमाण\n• पता प्रमाण\n• संबंधित प्रमाणपत्र या परमिट\n\n**प्रक्रिया:**\n1. आधिकारिक पोर्टल के माध्यम से शिकायत जमा करें\n2. स्वीकृति की प्रतीक्षा करें\n3. शिकायत ID का उपयोग करके स्थिति ट्रैक करें\n4. अधिकारियों के किसी भी प्रश्न का उत्तर दें\n5. समाधान से संतुष्ट न होने पर आगे बढ़ाएं";
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, { type: "bot", content: guidanceMessage }]);
+    }, 1000);
   };
 
   return (
-    <Layout>
-      <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
-                <MessageSquare className="w-8 h-8 text-white" />
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Grievance Assistant</h1>
-            <p className="text-xl text-gray-600">Smart grievance filing and tracking system</p>
-          </div>
-
-          {/* Language Toggle */}
-          <div className="flex justify-center mb-6">
-            <div className="bg-white rounded-full p-1 shadow-lg border">
-              <div className="flex space-x-1">
-                <Button 
-                  variant={language === "english" ? "default" : "ghost"} 
-                  size="sm"
-                  onClick={() => setLanguage("english")}
-                  className={language === "english" ? "bg-red-500 hover:bg-red-600" : ""}
-                >
-                  English
-                </Button>
-                <Button 
-                  variant={language === "hindi" ? "default" : "ghost"} 
-                  size="sm"
-                  onClick={() => setLanguage("hindi")}
-                  className={language === "hindi" ? "bg-red-500 hover:bg-red-600" : ""}
-                >
-                  हिंदी
-                </Button>
-              </div>
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 to-pink-100">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
+              <MessageSquare className="w-8 h-8 text-white" />
             </div>
           </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Grievance Assistant</h1>
+          <p className="text-xl text-gray-600">Smart grievance filing and tracking system</p>
+        </div>
 
-          {/* Chat Interface */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5" />
-                <span>Grievance Chat Assistant</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
-                {messages.map((message, index) => (
-                  <div key={index} className={`mb-4 ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
-                    <div className={`inline-block p-3 rounded-lg max-w-xs lg:max-w-md ${
-                      message.type === 'user' 
-                        ? 'bg-red-500 text-white' 
-                        : 'bg-white text-gray-800 border'
-                    }`}>
-                      <pre className="whitespace-pre-wrap font-sans text-sm">{message.content}</pre>
-                      {message.isComplete && (
-                        <div className="mt-3">
-                          <Button 
-                            size="sm" 
-                            className="bg-green-500 hover:bg-green-600"
-                            onClick={() => {
-                              setStep(0);
-                              setGrievanceData({
-                                name: "", contact: "", email: "", type: "",
-                                description: "", location: "", date: "", urgency: "",
-                                previousReport: "", outcome: ""
-                              });
-                              setMessages([{
-                                type: "bot",
-                                content: "Would you like to file another grievance? If yes, please provide your name:"
-                              }]);
-                            }}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            File New Grievance
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex space-x-2">
-                <Input
-                  placeholder={language === "english" ? "Type your response..." : "अपना उत्तर टाइप करें..."}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      const target = e.target as HTMLInputElement;
-                      const message = target.value.trim();
-                      if (message) {
-                        handleUserMessage(message);
-                        target.value = '';
-                      }
-                    }
-                  }}
-                />
-                <Button 
-                  onClick={() => {
-                    const input = document.querySelector('input') as HTMLInputElement;
-                    const message = input.value.trim();
-                    if (message) {
-                      handleUserMessage(message);
-                      input.value = '';
-                    }
-                  }}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Language Toggle */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-white rounded-full p-1 shadow-lg border">
+            <div className="flex space-x-1">
+              <Button 
+                variant={language === "english" ? "default" : "ghost"} 
+                size="sm"
+                onClick={() => setLanguage("english")}
+                className={language === "english" ? "bg-red-500 hover:bg-red-600" : ""}
+              >
+                English
+              </Button>
+              <Button 
+                variant={language === "hindi" ? "default" : "ghost"} 
+                size="sm"
+                onClick={() => setLanguage("hindi")}
+                className={language === "hindi" ? "bg-red-500 hover:bg-red-600" : ""}
+              >
+                हिंदी
+              </Button>
+            </div>
+          </div>
+        </div>
 
-          {/* Additional Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Chat Interface - Larger */}
+          <div className="lg:col-span-3">
+            <Card className="shadow-xl border-0">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50">
                 <CardTitle className="flex items-center space-x-2">
-                  <Upload className="w-5 h-5" />
-                  <span>Evidence Upload</span>
+                  <MessageSquare className="w-5 h-5 text-red-600" />
+                  <span>Grievance Chat Assistant</span>
+                  {isLoading && <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin ml-2"></div>}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-3">
-                  Upload supporting documents, images, or audio files
-                </p>
-                <Button variant="outline" className="w-full">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Select Files
-                </Button>
+              <CardContent className="p-0">
+                <div className="p-4">
+                  <ChatInterface
+                    messages={messages}
+                    onSendMessage={handleUserMessage}
+                    placeholder={language === "english" ? "Type your response..." : "अपना उत्तर टाइप करें..."}
+                    language={language}
+                    className="h-[600px]"
+                  />
+                </div>
               </CardContent>
             </Card>
+          </div>
 
-            <Card>
+          {/* Sidebar - Smaller */}
+          <div className="space-y-6">
+            <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <AlertCircle className="w-5 h-5" />
+                <CardTitle className="flex items-center space-x-2 text-sm">
+                  <AlertCircle className="w-4 h-4" />
                   <span>Important Tips</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• Provide detailed and accurate information</li>
+                <ul className="space-y-2 text-xs text-gray-600">
+                  <li>• Provide detailed information</li>
                   <li>• Include evidence if available</li>
-                  <li>• Track your grievance using the ID</li>
-                  <li>• Follow up if no response within timeline</li>
+                  <li>• Track using Grievance ID</li>
+                  <li>• Follow up if needed</li>
                 </ul>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 
