@@ -8,6 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Send, Download, Globe, User, MapPin } from "lucide-react";
 
+interface Message {
+  type: "bot" | "user";
+  content: string;
+  draft?: string;
+}
+
 const RTI = () => {
   const [step, setStep] = useState(0);
   const [language, setLanguage] = useState("english");
@@ -18,7 +24,7 @@ const RTI = () => {
     issue: "",
     details: ""
   });
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       type: "bot",
       content: "🙏 Namaste! I'm JAN-RTI — your digital guide for RTI (Right to Information) assistance.\n\nPlease choose what you'd like to do:\n1️⃣ File an RTI\n2️⃣ Do you want any information?"
@@ -207,7 +213,7 @@ ${formData.name}
                             className="mt-2"
                             onClick={() => {
                               const element = document.createElement('a');
-                              const file = new Blob([message.draft], {type: 'text/plain'});
+                              const file = new Blob([message.draft!], {type: 'text/plain'});
                               element.href = URL.createObjectURL(file);
                               element.download = 'RTI_Application.txt';
                               document.body.appendChild(element);
@@ -230,17 +236,18 @@ ${formData.name}
                   placeholder={language === "english" ? "Type your message..." : "अपना संदेश टाइप करें..."}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
-                      const message = e.target.value.trim();
+                      const target = e.target as HTMLInputElement;
+                      const message = target.value.trim();
                       if (message) {
                         handleUserMessage(message);
-                        e.target.value = '';
+                        target.value = '';
                       }
                     }
                   }}
                 />
                 <Button 
                   onClick={() => {
-                    const input = document.querySelector('input');
+                    const input = document.querySelector('input') as HTMLInputElement;
                     const message = input.value.trim();
                     if (message) {
                       handleUserMessage(message);

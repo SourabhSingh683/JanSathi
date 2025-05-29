@@ -7,10 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Award, Send, Search, ExternalLink, Users, DollarSign, Calendar, CheckCircle } from "lucide-react";
 
+interface Message {
+  type: "bot" | "user";
+  content: string;
+}
+
 const Schemes = () => {
   const [language, setLanguage] = useState("english");
   const [searchQuery, setSearchQuery] = useState("");
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       type: "bot",
       content: "🙏 Namaste! I'm your Schemes Assistant. I can help you find government schemes, check eligibility, and provide application links.\n\nWhat can I help you with today?\n\n1️⃣ Find schemes by category\n2️⃣ Check eligibility for specific schemes\n3️⃣ Get application links\n4️⃣ Ask about scheme benefits"
@@ -214,17 +219,18 @@ const Schemes = () => {
                       placeholder={language === "english" ? "Ask about schemes..." : "योजनाओं के बारे में पूछें..."}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                          const message = e.target.value.trim();
+                          const target = e.target as HTMLInputElement;
+                          const message = target.value.trim();
                           if (message) {
                             handleUserMessage(message);
-                            e.target.value = '';
+                            target.value = '';
                           }
                         }
                       }}
                     />
                     <Button 
                       onClick={() => {
-                        const input = document.querySelector('input');
+                        const input = document.querySelector('input') as HTMLInputElement;
                         const message = input.value.trim();
                         if (message) {
                           handleUserMessage(message);

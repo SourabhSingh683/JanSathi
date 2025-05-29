@@ -8,6 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageSquare, Send, Upload, AlertCircle, CheckCircle } from "lucide-react";
 
+interface Message {
+  type: "bot" | "user";
+  content: string;
+  isComplete?: boolean;
+}
+
 const Grievance = () => {
   const [step, setStep] = useState(0);
   const [language, setLanguage] = useState("english");
@@ -23,7 +29,7 @@ const Grievance = () => {
     previousReport: "",
     outcome: ""
   });
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       type: "bot",
       content: "🙏 Namaste! I'm your Grievance Assistant. I'm here to help you file and track your complaints.\n\nI'll guide you through the process step by step. Let's start!\n\nMay I know your full name?"
@@ -309,17 +315,18 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
                   placeholder={language === "english" ? "Type your response..." : "अपना उत्तर टाइप करें..."}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
-                      const message = e.target.value.trim();
+                      const target = e.target as HTMLInputElement;
+                      const message = target.value.trim();
                       if (message) {
                         handleUserMessage(message);
-                        e.target.value = '';
+                        target.value = '';
                       }
                     }
                   }}
                 />
                 <Button 
                   onClick={() => {
-                    const input = document.querySelector('input');
+                    const input = document.querySelector('input') as HTMLInputElement;
                     const message = input.value.trim();
                     if (message) {
                       handleUserMessage(message);
