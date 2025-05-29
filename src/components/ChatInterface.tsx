@@ -17,6 +17,7 @@ interface ChatInterfaceProps {
   placeholder?: string;
   language?: string;
   className?: string;
+  isLoading?: boolean;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
@@ -24,7 +25,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onSendMessage, 
   placeholder = "Type your message...",
   language = "english",
-  className = ""
+  className = "",
+  isLoading = false
 }) => {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -44,36 +46,36 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [messages]);
 
   const handleSend = () => {
-    if (inputValue.trim()) {
+    if (inputValue.trim() && !isLoading) {
       onSendMessage(inputValue.trim());
       setInputValue("");
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isLoading) {
       handleSend();
     }
   };
 
   return (
-    <div className={`flex flex-col ${className}`}>
+    <div className={`flex flex-col h-full ${className}`}>
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg space-y-4 max-h-[500px]"
-        style={{ scrollBehavior: 'smooth' }}
+        className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg space-y-4"
+        style={{ scrollBehavior: 'smooth', maxHeight: 'calc(100vh - 300px)' }}
       >
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-xs lg:max-w-md p-3 rounded-lg ${
+            <div className={`max-w-[85%] lg:max-w-[75%] p-3 rounded-lg ${
               message.type === 'user' 
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white text-gray-800 border shadow-sm'
             }`}>
-              <pre className="whitespace-pre-wrap font-sans text-sm">{message.content}</pre>
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{message.content}</pre>
               {message.draft && (
                 <div className="mt-3 p-3 bg-gray-100 rounded text-sm">
-                  <pre className="whitespace-pre-wrap font-mono text-xs">{message.draft}</pre>
+                  <pre className="whitespace-pre-wrap font-mono text-xs max-h-40 overflow-y-auto">{message.draft}</pre>
                   <Button 
                     size="sm" 
                     className="mt-2"
@@ -95,18 +97,35 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </div>
           </div>
         ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white text-gray-800 border shadow-sm p-3 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></div>
+                <span className="text-sm text-gray-500 ml-2">Typing...</span>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 bg-white p-2 rounded-lg border">
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           className="flex-1"
+          disabled={isLoading}
         />
-        <Button onClick={handleSend} className="px-4">
+        <Button 
+          onClick={handleSend} 
+          className="px-4"
+          disabled={isLoading || !inputValue.trim()}
+        >
           <Send className="w-4 h-4" />
         </Button>
       </div>

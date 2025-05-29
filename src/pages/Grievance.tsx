@@ -2,13 +2,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Send, CheckCircle, AlertCircle } from "lucide-react";
+import { MessageSquare, Send, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import ChatInterface from "@/components/ChatInterface";
 import { generateGrievanceResponse } from "@/utils/grievanceAI";
 
 interface Message {
   type: "bot" | "user";
   content: string;
+  draft?: string;
   isComplete?: boolean;
 }
 
@@ -160,8 +162,90 @@ const Grievance = () => {
   };
 
   const generateGrievanceSummary = async () => {
-    const grievanceId = `GRV-${Date.now()}`;
-    const summary = language === "english" ? `
+    try {
+      const grievanceId = `GRV-${Date.now()}`;
+      
+      // Use AI to enhance the grievance description
+      const enhancedResponse = await generateGrievanceResponse(
+        `Please enhance this grievance description with proper legal language and structure: 
+        Type: ${grievanceData.type}
+        Issue: ${grievanceData.description}
+        Location: ${grievanceData.location}
+        Date: ${grievanceData.date}
+        Previous report: ${grievanceData.previousReport}`,
+        language
+      );
+
+      // Create the grievance application draft
+      const applicationDraft = language === "english" ? `
+To: The Concerned Authority
+Subject: Formal Grievance Application - ${grievanceData.type}
+
+Respected Sir/Madam,
+
+I, ${grievanceData.name}, a citizen of India, hereby submit this formal grievance application regarding ${grievanceData.type.toLowerCase()}.
+
+GRIEVANCE DETAILS:
+${enhancedResponse}
+
+INCIDENT INFORMATION:
+• Date of Occurrence: ${grievanceData.date}
+• Location: ${grievanceData.location}
+• Urgency Level: ${grievanceData.urgency}
+
+COMPLAINANT DETAILS:
+• Name: ${grievanceData.name}
+• Contact Number: ${grievanceData.contact}
+• Email: ${grievanceData.email}
+
+${grievanceData.previousReport ? `PREVIOUS COMPLAINTS:
+This matter was previously reported. Previous outcome: ${grievanceData.outcome}` : ''}
+
+I request you to take immediate action on this matter and provide a resolution within the stipulated time frame.
+
+I am available for any clarification or additional information that may be required.
+
+Thanking you,
+
+${grievanceData.name}
+Date: ${new Date().toLocaleDateString()}
+Grievance ID: ${grievanceId}
+      ` : `
+सेवा में: संबंधित प्राधिकारी
+विषय: औपचारिक शिकायत आवेदन - ${grievanceData.type}
+
+महोदय/महोदया,
+
+मैं, ${grievanceData.name}, भारत का नागरिक, ${grievanceData.type} के संबंध में यह औपचारिक शिकायत आवेदन प्रस्तुत करता हूं।
+
+शिकायत का विवरण:
+${enhancedResponse}
+
+घटना की जानकारी:
+• घटना की तारीख: ${grievanceData.date}
+• स्थान: ${grievanceData.location}
+• तात्कालिकता स्तर: ${grievanceData.urgency}
+
+शिकायतकर्ता का विवरण:
+• नाम: ${grievanceData.name}
+• संपर्क नंबर: ${grievanceData.contact}
+• ईमेल: ${grievanceData.email}
+
+${grievanceData.previousReport ? `पूर्व शिकायतें:
+इस मामले की पहले रिपोर्ट की गई थी। पिछला परिणाम: ${grievanceData.outcome}` : ''}
+
+मैं आपसे अनुरोध करता हूं कि इस मामले पर तत्काल कार्रवाई करें और निर्धारित समय सीमा के भीतर समाधान प्रदान करें।
+
+किसी भी स्पष्टीकरण या अतिरिक्त जानकारी के लिए मैं उपलब्ध हूं।
+
+धन्यवाद,
+
+${grievanceData.name}
+दिनांक: ${new Date().toLocaleDateString()}
+शिकायत ID: ${grievanceId}
+      `;
+
+      const summary = language === "english" ? `
 🎯 GRIEVANCE SUMMARY
 
 📋 Grievance ID: ${grievanceId}
@@ -184,7 +268,7 @@ ${grievanceData.outcome ? `📊 Previous Outcome: ${grievanceData.outcome}` : ''
 📲 Updates: Will be sent via SMS/Email
 
 Thank you for using our Grievance Portal.
-    ` : `
+      ` : `
 🎯 शिकायत सारांश
 
 📋 शिकायत ID: ${grievanceId}
@@ -207,36 +291,54 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
 📲 अपडेट: SMS/ईमेल के माध्यम से भेजे जाएंगे
 
 धन्यवाद!
-    `;
+      `;
 
-    setMessages(prev => [...prev, { 
-      type: "bot", 
-      content: summary,
-      isComplete: true
-    }]);
+      setMessages(prev => [...prev, { 
+        type: "bot", 
+        content: summary,
+        draft: applicationDraft,
+        isComplete: true
+      }]);
 
-    // Add guidance message
-    const guidanceMessage = language === "english" 
-      ? "📋 **Next Steps & Required Documents:**\n\n**For Grievance Filing:**\n• Keep your Grievance ID for tracking\n• Retain copies of all related documents\n• Follow up if no response in stipulated time\n• Escalate to higher authorities if needed\n\n**Required Documents (if applicable):**\n• Copy of previous complaints\n• Supporting evidence (photos, receipts)\n• Identity proof\n• Address proof\n• Relevant certificates or permits\n\n**Process:**\n1. Submit grievance through official portal\n2. Wait for acknowledgment\n3. Track status using Grievance ID\n4. Respond to any queries from officials\n5. Escalate if unsatisfied with resolution"
-      : "📋 **अगले कदम और आवश्यक दस्तावेज:**\n\n**शिकायत दर्ज करने के लिए:**\n• ट्रैकिंग के लिए अपना शिकायत ID रखें\n• सभी संबंधित दस्तावेजों की प्रति रखें\n• निर्धारित समय में जवाब न मिले तो फॉलो अप करें\n• जरूरत पड़ने पर उच्च अधिकारियों तक पहुंचें\n\n**आवश्यक दस्तावेज (यदि लागू हो):**\n• पिछली शिकायतों की प्रति\n• सहायक सबूत (फोटो, रसीदें)\n• पहचान प्रमाण\n• पता प्रमाण\n• संबंधित प्रमाणपत्र या परमिट\n\n**प्रक्रिया:**\n1. आधिकारिक पोर्टल के माध्यम से शिकायत जमा करें\n2. स्वीकृति की प्रतीक्षा करें\n3. शिकायत ID का उपयोग करके स्थिति ट्रैक करें\n4. अधिकारियों के किसी भी प्रश्न का उत्तर दें\n5. समाधान से संतुष्ट न होने पर आगे बढ़ाएं";
+      // Add guidance message
+      const guidanceMessage = language === "english" 
+        ? "📋 **Next Steps & Required Documents:**\n\n**For Grievance Filing:**\n• Keep your Grievance ID for tracking\n• Retain copies of all related documents\n• Follow up if no response in stipulated time\n• Escalate to higher authorities if needed\n\n**Required Documents (if applicable):**\n• Copy of previous complaints\n• Supporting evidence (photos, receipts)\n• Identity proof\n• Address proof\n• Relevant certificates or permits\n\n**Process:**\n1. Submit grievance through official portal\n2. Wait for acknowledgment\n3. Track status using Grievance ID\n4. Respond to any queries from officials\n5. Escalate if unsatisfied with resolution"
+        : "📋 **अगले कदम और आवश्यक दस्तावेज:**\n\n**शिकायत दर्ज करने के लिए:**\n• ट्रैकिंग के लिए अपना शिकायत ID रखें\n• सभी संबंधित दस्तावेजों की प्रति रखें\n• निर्धारित समय में जवाब न मिले तो फॉलो अप करें\n• जरूरत पड़ने पर उच्च अधिकारियों तक पहुंचें\n\n**आवश्यक दस्तावेज (यदि लागू हो):**\n• पिछली शिकायतों की प्रति\n• सहायक सबूत (फोटो, रसीदें)\n• पहचान प्रमाण\n• पता प्रमाण\n• संबंधित प्रमाणपत्र या परमिट\n\n**प्रक्रिया:**\n1. आधिकारिक पोर्टल के माध्यम से शिकायत जमा करें\n2. स्वीकृति की प्रतीक्षा करें\n3. शिकायत ID का उपयोग करके स्थिति ट्रैक करें\n4. अधिकारियों के किसी भी प्रश्न का उत्तर दें\n5. समाधान से संतुष्ट न होने पर आगे बढ़ाएं";
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { type: "bot", content: guidanceMessage }]);
-    }, 1000);
+      setTimeout(() => {
+        setMessages(prev => [...prev, { type: "bot", content: guidanceMessage }]);
+      }, 1000);
+
+    } catch (error) {
+      console.error('Error generating grievance summary:', error);
+      const errorMessage = language === 'hindi' 
+        ? 'शिकायत तैयार करने में समस्या हुई।'
+        : 'Error generating grievance application.';
+      setMessages(prev => [...prev, { type: "bot", content: errorMessage }]);
+    }
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 to-pink-100">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen py-4 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 to-pink-100">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
-              <MessageSquare className="w-8 h-8 text-white" />
+        <div className="text-center mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <Link to="/">
+              <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Home</span>
+              </Button>
+            </Link>
+            <div className="flex justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-white" />
+              </div>
             </div>
+            <div className="w-20"></div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Grievance Assistant</h1>
-          <p className="text-xl text-gray-600">Smart grievance filing and tracking system</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">Grievance Assistant</h1>
+          <p className="text-lg md:text-xl text-gray-600">Smart grievance filing and tracking system</p>
         </div>
 
         {/* Language Toggle */}
@@ -263,7 +365,7 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chat Interface - Larger */}
           <div className="lg:col-span-3">
             <Card className="shadow-xl border-0">
@@ -275,13 +377,14 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="p-4">
+                <div className="p-4" style={{ height: '600px' }}>
                   <ChatInterface
                     messages={messages}
                     onSendMessage={handleUserMessage}
                     placeholder={language === "english" ? "Type your response..." : "अपना उत्तर टाइप करें..."}
                     language={language}
-                    className="h-[600px]"
+                    className="h-full"
+                    isLoading={isLoading}
                   />
                 </div>
               </CardContent>
@@ -289,7 +392,7 @@ ${grievanceData.outcome ? `📊 पिछला परिणाम: ${grievanceD
           </div>
 
           {/* Sidebar - Smaller */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-sm">

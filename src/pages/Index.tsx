@@ -51,33 +51,6 @@ const Index = () => {
     }
   ];
 
-  const stats = [
-    {
-      icon: Users,
-      value: "10,000+",
-      label: "Citizens Helped",
-      color: "text-blue-600"
-    },
-    {
-      icon: FileText,
-      value: "5,000+",
-      label: "RTI Applications",
-      color: "text-green-600"
-    },
-    {
-      icon: MessageSquare,
-      value: "3,000+",
-      label: "Grievances Resolved",
-      color: "text-red-600"
-    },
-    {
-      icon: Award,
-      value: "500+",
-      label: "Schemes Matched",
-      color: "text-yellow-600"
-    }
-  ];
-
   const problemsWesolve = [
     {
       icon: Target,
@@ -122,16 +95,16 @@ const Index = () => {
             <div className="inline-flex items-center justify-center p-2 bg-gradient-to-r from-indian-saffron to-indian-green rounded-full mb-6 animate-bounce">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 animate-fade-in">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 animate-fade-in">
               Welcome to{" "}
               <span className="bg-gradient-to-r from-indian-saffron via-indian-white to-indian-green bg-clip-text text-transparent animate-pulse">
                 JanSathi
               </span>
             </h1>
-            <p className="text-2xl md:text-3xl text-gray-600 max-w-4xl mx-auto mb-6 animate-fade-in">
+            <p className="text-xl md:text-2xl lg:text-3xl text-gray-600 max-w-4xl mx-auto mb-6 animate-fade-in">
               Your AI-Powered Digital Gateway to Government Services
             </p>
-            <p className="text-lg text-gray-500 max-w-3xl mx-auto animate-fade-in">
+            <p className="text-base md:text-lg text-gray-500 max-w-3xl mx-auto animate-fade-in">
               Experience the future of citizen services with intelligent assistants that understand your needs. 
               Available in Hindi and English, no registration required.
             </p>
@@ -143,23 +116,23 @@ const Index = () => {
                 Choose Your Assistant
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              {/* Dropdown for assistants */}
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+              {/* Dropdown for assistants - Fixed to show all options */}
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 min-w-max">
                 <div className="p-4 space-y-2">
                   <Link to="/rti" className="block">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-blue-50">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-blue-50 whitespace-nowrap">
                       <FileText className="w-4 h-4 mr-2 text-blue-500" />
                       RTI Assistant
                     </Button>
                   </Link>
                   <Link to="/grievance" className="block">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-red-50">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-red-50 whitespace-nowrap">
                       <MessageSquare className="w-4 h-4 mr-2 text-red-500" />
                       Grievance Assistant
                     </Button>
                   </Link>
                   <Link to="/schemes" className="block">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-green-50">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-green-50 whitespace-nowrap">
                       <Award className="w-4 h-4 mr-2 text-green-500" />
                       Schemes Assistant
                     </Button>
@@ -176,34 +149,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div key={index} className="text-center group">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-gray-50 group-hover:bg-gray-100 transition-colors ${stat.color}`}>
-                    <Icon className="w-8 h-8" />
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* Features Section with Enhanced Cards */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
               AI-Powered Government Services
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Revolutionary technology meets citizen services. Experience government assistance like never before.
             </p>
           </div>
@@ -218,12 +171,12 @@ const Index = () => {
                     <div className={`w-20 h-20 mx-auto rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                       <Icon className="w-10 h-10 text-white" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+                    <CardTitle className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                       {feature.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-center px-6 pb-8">
-                    <CardDescription className="text-gray-600 mb-8 text-base leading-relaxed">
+                    <CardDescription className="text-gray-600 mb-8 text-sm md:text-base leading-relaxed">
                       {feature.description}
                     </CardDescription>
                     <Link to={feature.href}>
@@ -244,10 +197,10 @@ const Index = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indian-saffron/5 to-indian-green/5">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Problems We Solve
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg md:text-xl text-gray-600">
               Making government services accessible and user-friendly for everyone
             </p>
           </div>
@@ -281,10 +234,10 @@ const Index = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Why Choose JanSathi?
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg md:text-xl text-gray-600">
               Experience the benefits of AI-powered government services
             </p>
           </div>
@@ -313,11 +266,11 @@ const Index = () => {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-r from-indian-saffron to-indian-green rounded-3xl p-12 text-white shadow-2xl">
-            <h2 className="text-4xl font-bold mb-6">
+          <div className="bg-gradient-to-r from-indian-saffron to-indian-green rounded-3xl p-8 md:p-12 text-white shadow-2xl">
+            <h2 className="text-2xl md:text-4xl font-bold mb-6">
               Ready to Transform Your Government Service Experience?
             </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-lg md:text-xl mb-8 opacity-90">
               Join thousands of citizens who are already using JanSathi for their government service needs.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
