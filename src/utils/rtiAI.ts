@@ -8,14 +8,22 @@ export const generateRTIResponse = async (userMessage: string, language: string 
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     
-    const prompt = `You are JAN-RTI, an expert RTI (Right to Information) assistant for India. Respond in ${language === 'hindi' ? 'Hindi' : 'English'}.
+    const prompt = `You are an RTI (Right to Information) Assistant for India. Respond in ${language === 'hindi' ? 'Hindi' : 'English'}.
     
     User query: ${userMessage}
     
-    Provide helpful guidance about RTI processes, eligibility, timeframes, and procedures. 
-    Be specific about Indian RTI laws and procedures.
-    Keep responses conversational, helpful, and encouraging.
-    If asked about specific issues, explain the RTI process for that domain.`;
+    Provide comprehensive guidance on RTI applications including:
+    - What information can be requested under RTI
+    - Which department/authority to approach
+    - Required documents and fees
+    - Application process and timelines
+    - Sample formats and templates
+    - Appeal process if needed
+    
+    Be specific, helpful, and encouraging. Include practical steps and mention that RTI is a fundamental right.
+    Always suggest visiting https://rtionline.gov.in for online applications.
+    
+    If the user describes a specific issue or problem, help them understand what specific information they should request under RTI to address their concern.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -28,46 +36,43 @@ export const generateRTIResponse = async (userMessage: string, language: string 
   }
 };
 
-export const generateRTIDepartment = async (issue: string, language: string = 'english') => {
+export const generateRTIApplication = async (userDetails: any, language: string = 'english') => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     
-    const prompt = `Based on this issue: "${issue}", identify the most appropriate government department in India. 
-    Respond with just the department name in ${language === 'hindi' ? 'Hindi' : 'English'}.
+    // Auto-determine department based on the issue
+    const departmentPrompt = `Based on this issue: "${userDetails.issue}", determine the most appropriate government department/ministry for an RTI application. Respond with just the department name.`;
     
-    Examples:
-    - Water/electricity issues -> जल विभाग/विद्युत विभाग or Water Department/Electricity Department
-    - Pension issues -> पेंशन विभाग or Pension Department
-    - Education issues -> शिक्षा विभाग or Education Department
+    const deptResult = await model.generateContent(departmentPrompt);
+    const department = await deptResult.response.text();
     
-    Just return the department name, nothing else.`;
+    // Generate detailed application with enhanced issue description
+    const applicationPrompt = `Generate a professional RTI application in ${language === 'hindi' ? 'Hindi' : 'English'} with these details:
+    
+    Name: ${userDetails.name}
+    Address: ${userDetails.address}
+    Phone: ${userDetails.phone}
+    Email: ${userDetails.email}
+    Issue/Problem: ${userDetails.issue}
+    Department: ${department.trim()}
+    
+    IMPORTANT: 
+    1. In the main body, clearly elaborate and explain the user's issue: "${userDetails.issue}" in detail
+    2. Specify exactly what information is being sought under RTI
+    3. Make it professional and legally sound
+    4. Include proper RTI format with all required sections
+    5. The issue should be prominently featured and well-explained in the application body
+    6. Add specific questions related to the user's problem that they want answered through RTI
+    
+    Format it as a complete RTI application ready for submission.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    const result = await model.generateContent(applicationPrompt);
+    const application = await result.response;
+    return application.text();
   } catch (error) {
-    console.error('Department AI Error:', error);
-    return language === 'hindi' ? 'संबंधित विभाग' : 'Relevant Department';
-  }
-};
-
-export const enhanceRTIApplication = async (formData: any, language: string = 'english') => {
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    
-    const prompt = `Create a detailed RTI application body in ${language === 'hindi' ? 'Hindi' : 'English'} based on:
-    - Issue: ${formData.issue}
-    - Details: ${formData.details}
-    - Name: ${formData.name}
-    - State: ${formData.state}
-    
-    Make it professional, specific, and include relevant RTI clauses. The main body should clearly explain what information is being sought and why.`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error('RTI Enhancement Error:', error);
-    return formData.details;
+    console.error('RTI Application Generation Error:', error);
+    return language === 'hindi' 
+      ? 'आवेदन तैयार करने में समस्या हुई। कृपया मैन्युअल रूप से तैयार करें।'
+      : 'Unable to generate application. Please prepare manually.';
   }
 };

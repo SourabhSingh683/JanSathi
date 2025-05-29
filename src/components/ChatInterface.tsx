@@ -33,37 +33,70 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (messagesEndRef.current && chatContainerRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "smooth", 
+        block: "end",
+        inline: "nearest"
+      });
     }
   };
 
   useEffect(() => {
+    // Prevent document scrolling
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
     const timer = setTimeout(() => {
       scrollToBottom();
     }, 100);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('scroll', preventScroll);
+    };
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (inputValue.trim() && !isLoading) {
       onSendMessage(inputValue.trim());
       setInputValue("");
+      
+      // Prevent any page scrolling
+      setTimeout(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      }, 100);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isLoading) {
+      e.preventDefault();
+      e.stopPropagation();
       handleSend();
     }
   };
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex flex-col h-full ${className}`} onClick={(e) => e.stopPropagation()}>
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg space-y-4"
-        style={{ scrollBehavior: 'smooth', maxHeight: 'calc(100vh - 300px)' }}
+        className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg space-y-4 scroll-smooth"
+        style={{ 
+          maxHeight: 'calc(100vh - 300px)',
+          scrollBehavior: 'smooth',
+          overscrollBehavior: 'contain'
+        }}
+        onScroll={(e) => e.stopPropagation()}
       >
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -79,7 +112,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <Button 
                     size="sm" 
                     className="mt-2"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       const element = document.createElement('a');
                       const file = new Blob([message.draft!], {type: 'text/plain'});
                       element.href = URL.createObjectURL(file);
@@ -112,7 +146,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="flex space-x-2 bg-white p-2 rounded-lg border">
+      <form onSubmit={handleSend} className="flex space-x-2 bg-white p-2 rounded-lg border">
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -120,15 +154,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           onKeyPress={handleKeyPress}
           className="flex-1"
           disabled={isLoading}
+          onClick={(e) => e.stopPropagation()}
         />
         <Button 
-          onClick={handleSend} 
+          type="submit"
           className="px-4"
           disabled={isLoading || !inputValue.trim()}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSend(e);
+          }}
         >
           <Send className="w-4 h-4" />
         </Button>
-      </div>
+      </form>
     </div>
   );
 };

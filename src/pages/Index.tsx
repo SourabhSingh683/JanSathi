@@ -2,6 +2,12 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FileText, MessageSquare, Award, Users, CheckCircle, Globe, Sparkles, ArrowRight, Zap, Shield, Clock, Star, Target, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -97,7 +103,7 @@ const Index = () => {
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 animate-fade-in">
               Welcome to{" "}
-              <span className="bg-gradient-to-r from-indian-saffron via-indian-white to-indian-green bg-clip-text text-transparent animate-pulse">
+              <span className="bg-gradient-to-r from-orange-600 via-orange-800 to-green-600 bg-clip-text text-transparent font-extrabold">
                 JanSathi
               </span>
             </h1>
@@ -111,35 +117,43 @@ const Index = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in">
-            <div className="relative group">
-              <Button size="lg" className="bg-gradient-to-r from-indian-saffron to-orange-600 hover:from-orange-600 hover:to-indian-saffron text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg group-hover:shadow-2xl">
-                Choose Your Assistant
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              {/* Dropdown for assistants - Fixed to show all options */}
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 min-w-max">
-                <div className="p-4 space-y-2">
-                  <Link to="/rti" className="block">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-blue-50 whitespace-nowrap">
-                      <FileText className="w-4 h-4 mr-2 text-blue-500" />
-                      RTI Assistant
-                    </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="lg" className="bg-gradient-to-r from-indian-saffron to-orange-600 hover:from-orange-600 hover:to-indian-saffron text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  Choose Your Assistant
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64 bg-white shadow-2xl border rounded-xl p-2 z-50">
+                <DropdownMenuItem asChild className="p-0">
+                  <Link to="/rti" className="flex items-center w-full p-3 hover:bg-blue-50 rounded-lg transition-colors">
+                    <FileText className="w-5 h-5 mr-3 text-blue-500" />
+                    <div>
+                      <div className="font-medium text-gray-900">RTI Assistant</div>
+                      <div className="text-sm text-gray-500">File RTI applications</div>
+                    </div>
                   </Link>
-                  <Link to="/grievance" className="block">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-red-50 whitespace-nowrap">
-                      <MessageSquare className="w-4 h-4 mr-2 text-red-500" />
-                      Grievance Assistant
-                    </Button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="p-0">
+                  <Link to="/grievance" className="flex items-center w-full p-3 hover:bg-red-50 rounded-lg transition-colors">
+                    <MessageSquare className="w-5 h-5 mr-3 text-red-500" />
+                    <div>
+                      <div className="font-medium text-gray-900">Grievance Assistant</div>
+                      <div className="text-sm text-gray-500">File complaints</div>
+                    </div>
                   </Link>
-                  <Link to="/schemes" className="block">
-                    <Button variant="ghost" className="w-full justify-start hover:bg-green-50 whitespace-nowrap">
-                      <Award className="w-4 h-4 mr-2 text-green-500" />
-                      Schemes Assistant
-                    </Button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="p-0">
+                  <Link to="/schemes" className="flex items-center w-full p-3 hover:bg-green-50 rounded-lg transition-colors">
+                    <Award className="w-5 h-5 mr-3 text-green-500" />
+                    <div>
+                      <div className="font-medium text-gray-900">Schemes Assistant</div>
+                      <div className="text-sm text-gray-500">Discover schemes</div>
+                    </div>
                   </Link>
-                </div>
-              </div>
-            </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link to="/how-it-works">
               <Button variant="outline" size="lg" className="border-2 border-indian-saffron text-indian-saffron hover:bg-indian-saffron hover:text-white py-4 px-8 rounded-xl text-lg transition-all duration-300">
                 How It Works
