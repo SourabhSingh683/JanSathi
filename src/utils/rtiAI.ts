@@ -36,6 +36,50 @@ export const generateRTIResponse = async (userMessage: string, language: string 
   }
 };
 
+export const generateRTIDepartment = async (issue: string, language: string = 'english') => {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    
+    const prompt = `Based on this issue: "${issue}", determine the most appropriate government department/ministry for an RTI application. Respond with just the department name in ${language === 'hindi' ? 'Hindi' : 'English'}.`;
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error) {
+    console.error('RTI Department Generation Error:', error);
+    return language === 'hindi' 
+      ? 'संबंधित विभाग'
+      : 'Relevant Department';
+  }
+};
+
+export const enhanceRTIApplication = async (rtiData: any, language: string = 'english') => {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    
+    const prompt = `Enhance and elaborate this RTI application issue in ${language === 'hindi' ? 'Hindi' : 'English'}:
+    
+    Issue: ${rtiData.issue}
+    Details: ${rtiData.details}
+    
+    Create a detailed, professional application body that:
+    1. Clearly explains the user's problem: "${rtiData.issue}"
+    2. Provides context and background
+    3. Specifies exactly what information is being sought under RTI
+    4. Makes it legally sound and professional
+    5. Includes specific questions related to the problem
+    
+    Write only the main body content, not the full application format.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('RTI Enhancement Error:', error);
+    return rtiData.details || rtiData.issue;
+  }
+};
+
 export const generateRTIApplication = async (userDetails: any, language: string = 'english') => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
